@@ -7,6 +7,7 @@
  export const saveCredential = async (userId: string, credentialData: any) => {
    try {
 -    const credentialRef = doc(db, 'credentials', `${userId}_${credentialData.type}`);
+    const credentialRef = doc(db, 'credentials', userId, 'providers', credentialData.type);
 +    const credentialRef = doc(db, 'users', userId, 'credentials', credentialData.type);
      await setDoc(credentialRef, {
        ...credentialData,
@@ -23,6 +24,7 @@
  export const getCredential = async (userId: string, platform: string) => {
    try {
 -    const credentialRef = doc(db, 'credentials', `${userId}_${platform}`);
+    const credentialRef = doc(db, 'credentials', userId, 'providers', platform);
 +    const credentialRef = doc(db, 'users', userId, 'credentials', platform);
      const credentialSnap = await getDoc(credentialRef);
      
@@ -41,6 +43,8 @@
 -    const credentialsRef = collection(db, 'credentials');
 -    const q = query(credentialsRef, where('userId', '==', userId));
 -    const querySnapshot = await getDocs(q);
+    const credentialsRef = collection(db, 'credentials', userId, 'providers');
+    const querySnapshot = await getDocs(credentialsRef);
 +    const credentialsRef = collection(db, 'users', userId, 'credentials');
 +    const querySnapshot = await getDocs(credentialsRef);
      
@@ -49,6 +53,9 @@
 -      credentials.push({ id: doc.id, ...doc.data() } as UserCredentials);
 +      credentials.push({ 
 +        id: doc.id, 
+        type: doc.id, // The document ID is the provider type
+        ...doc.data() 
+      } as UserCredentials);
 +        type: doc.id, // The document ID is the credential type
 +        ...doc.data() 
 +      } as UserCredentials);
